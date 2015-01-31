@@ -40,7 +40,7 @@ public function strLength($str,$len){
   } 
 public function xtd_shortcode( $atts ) {
   extract( shortcode_atts( array(
-    'url' => plugins_url('hello_kitty.x3d', __FILE__),
+    'url' => plugins_url('kitty.x3dom', __FILE__),
     'width' => '800',
     'height' => '600'
   ), $atts, 'x3d' ) );
