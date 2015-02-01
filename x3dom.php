@@ -9,6 +9,33 @@ Author URI: http://www.turneremanager.com
 Credits: va3c - http://va3c.github.io/
 */
 /*-------------------------------------------------------*/
+/* Turn on/off debug
+/*-------------------------------------------------------*/
+$xthreedom_debug = new xthreedom_debug();
+class xthreedom_debug {
+    function xthreedom_debug( ) {
+        add_filter( 'admin_init' , array( &$this , 'xtd_register_fields' ) );
+        $debug = get_option('xthreed_debug', false);
+        if ($debug === 'true'){
+          add_action( 'wp_enqueue_scripts', array($this, 'debug_script'), 10, 0  );
+        }
+    }
+    function xtd_register_fields() {
+        register_setting( 'general', 'xthreed_debug', 'esc_attr' );
+        add_settings_field('xthreed_debug', '<label for="xthreed_debug">'.__('Turn on x3d debug' , 'xthreed_debug' ).'</label>' , array(&$this, 'xtd_fields_html') , 'general' );
+    }
+    function xtd_fields_html() {
+        $value = get_option( 'xthreed_debug', '' );
+        echo '<input type="radio" id="xthreed_debug" name="xthreed_debug" value="true" /> True 
+              <input type="radio" id="xthreed_debug" name="xthreed_debug" value="false" /> False<br />';
+    }
+    
+    public function debug_script() {
+    wp_register_script('x3ddebug', plugins_url('x3dom.debug.js', __FILE__), false);
+    wp_enqueue_script('x3ddebug');
+}
+}
+/*-------------------------------------------------------*/
 /* Add Model Post Type
 /*-------------------------------------------------------*/
 function register_xthreedom_posttype() {
@@ -105,12 +132,17 @@ if(function_exists("register_field_group"))
         'key' => 'field_54cd7c39a40a3',
         'label' => 'x3d Code',
         'name' => 'x3d_code',
-        'type' => 'textarea',
-        'default_value' => '',
-        'placeholder' => '',
-        'maxlength' => '',
-        'rows' => '',
-        'formatting' => 'br',
+        'type' => 'code_area',
+        'language' => 'htmlmixed',
+        'theme' => 'ambiance',
+      ),
+      array (
+        'key' => 'field_54cd7c39a40a4',
+        'label' => 'x3d File',
+        'name' => 'x3d_file',
+        'type' => 'file',
+        'save_format' => 'object',
+        'library' => 'all',
       ),
       array (
         'key' => 'field_54cd7e87fb551',
@@ -149,20 +181,33 @@ if(function_exists("register_field_group"))
 add_action( 'wp_enqueue_scripts', 'xtd_scripts', 10, 0  );
 function xtd_scripts() {
     wp_register_script('x3dom', plugins_url('x3dom.js', __FILE__), false);
-    wp_register_script('x3ddebug', plugins_url('x3dom.debug.js', __FILE__), false);
     wp_register_style('x3dom', plugins_url('x3dom.css', __FILE__), false);
     wp_enqueue_script('x3dom');
     wp_enqueue_style('x3dom');
-    wp_enqueue_script('x3ddebug');
 }
 
+function dom_dimensions($width, $height){
+  echo '<style>
+          x3d {
+            width: '.$width.'px;
+            height: '.$height.'px;
+          }
+  </style>';
+}
 add_shortcode('x3d', 'xtd_shortcode');
 function xtd_shortcode( $atts ) {
   extract( shortcode_atts( array(
     'id' => '27',
     'width' => '800',
-    'height' => '600'
+    'height' => '600',
+    'file' => false
   ), $atts, 'x3d' ) );
+  add_action('wp_head','dom_dimensions');
   $x3dcode = get_field('x3d_code',$id, false);
-  return $x3dcode;
+  $x3file = file_get_contents(get_field('x3d_file'));
+  if ($file === true){
+    return $x3dfile;
+  } else {
+    return $x3dcode;
+  }
 }
