@@ -149,9 +149,11 @@ if(function_exists("register_field_group"))
 add_action( 'wp_enqueue_scripts', 'xtd_scripts', 10, 0  );
 function xtd_scripts() {
     wp_register_script('x3dom', plugins_url('x3dom.js', __FILE__), false);
+    wp_register_script('x3ddebug', plugins_url('x3dom.debug.js', __FILE__), false);
     wp_register_style('x3dom', plugins_url('x3dom.css', __FILE__), false);
     wp_enqueue_script('x3dom');
     wp_enqueue_style('x3dom');
+    wp_enqueue_script('x3ddebug');
 }
 
 add_shortcode('x3d', 'xtd_shortcode');
