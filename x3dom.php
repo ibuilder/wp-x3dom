@@ -33,7 +33,7 @@ class xthreedom_debug {
     public function debug_script() {
     wp_register_script('x3ddebug', plugins_url('x3dom.debug.js', __FILE__), false);
     wp_enqueue_script('x3ddebug');
-}
+  }
 }
 /*-------------------------------------------------------*/
 /* Add Model Post Type
@@ -122,6 +122,14 @@ function my_register_fields()
 /*-------------------------------------------------------*/
 /* Add custom meta
 /*-------------------------------------------------------*/
+function xthreecom_myme_types($mime_types){
+    $mime_types['x3dom'] = 'model/x3d+fastinfoset'; //Adding x3dom
+    return $mime_types;
+}
+add_filter('upload_mimes', 'xthreecom_myme_types', 1, 1);
+/*-------------------------------------------------------*/
+/* Add custom meta
+/*-------------------------------------------------------*/
 if(function_exists("register_field_group"))
 {
   register_field_group(array (
@@ -141,7 +149,7 @@ if(function_exists("register_field_group"))
         'label' => 'x3d File',
         'name' => 'x3d_file',
         'type' => 'file',
-        'save_format' => 'object',
+        'save_format' => 'url',
         'library' => 'all',
       ),
       array (
@@ -200,13 +208,16 @@ function xtd_shortcode( $atts ) {
     'id' => '27',
     'width' => '800',
     'height' => '600',
-    'file' => false
+    'file' => 'false'
   ), $atts, 'x3d' ) );
   add_action('wp_head','dom_dimensions');
   $x3dcode = get_field('x3d_code',$id, false);
-  $x3file = file_get_contents(get_field('x3d_file'));
-  if ($file === true){
-    return $x3dfile;
+  $x3file = get_field('x3d_file',$id);
+  if ($file === 'true'){
+    // file method does not work with inclusion from http, need to rework the way we include a file
+      global $wp_filesystem;
+      $x3dcontent = $wp_filesystem->get_contents($x3file);
+      return $x3dcontent;
   } else {
     return $x3dcode;
   }
