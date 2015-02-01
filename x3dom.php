@@ -76,15 +76,21 @@ add_action('init', 'register_xthreedom_posttype');
 /*-------------------------------------------------------*/
 if( !function_exists( 'acf_form' ) ) 
 {
-  add_action('admin_notices', 'books_plugin_notice');
+  add_action('admin_notices', 'x3dom_plugin_notice');
 }
-function books_plugin_notice(){    
+function x3dom_plugin_notice(){    
    echo '<div class="updated"><p>Congrats on installing the <i>x3d viewer</i> Plugin for Wordpress.  This plugin requires the following plugins installed on your wp site to work properly:
       <ul>
         <li><a href="https://wordpress.org/plugins/advanced-custom-fields/">Advanced Custom Fields</a></li>
         <li><a href="https://wordpress.org/plugins/advanced-custom-fields-code-area-field/">ACF Code Area Field</a></li>
       </ul>
    </p></div>';
+}
+add_action('acf/register_fields', 'my_register_fields');
+
+function my_register_fields()
+{
+    include_once('acf_code_area-field/acf_code_area-v3.php');
 }
 /*-------------------------------------------------------*/
 /* Add custom meta
@@ -99,9 +105,12 @@ if(function_exists("register_field_group"))
         'key' => 'field_54cd7c39a40a3',
         'label' => 'x3d Code',
         'name' => 'x3d_code',
-        'type' => 'code_area',
-        'language' => 'htmlmixed',
-        'theme' => 'default',
+        'type' => 'textarea',
+        'default_value' => '',
+        'placeholder' => '',
+        'maxlength' => '',
+        'rows' => '',
+        'formatting' => 'br',
       ),
       array (
         'key' => 'field_54cd7e87fb551',
@@ -152,6 +161,6 @@ function xtd_shortcode( $atts ) {
     'width' => '800',
     'height' => '600'
   ), $atts, 'x3d' ) );
-  $x3dcode = get_field('x3d_code',$id);
+  $x3dcode = get_field('x3d_code',$id, false);
   return $x3dcode;
 }
